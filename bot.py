@@ -335,6 +335,13 @@ async def post_init(application: Application):
     await scrape_once()
 
 
+async def force_scrape_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Hidden command to manually trigger a scrape cycle."""
+    await update.message.reply_text("🔄 Forcing a background job scrape... this might take a few seconds.")
+    inserted = await scrape_once()
+    await update.message.reply_text(f"✅ Scrape complete! {inserted} new/updated jobs processed.")
+
+
 def main():
     if not BOT_TOKEN:
         raise RuntimeError("BOT_TOKEN environment variable is required")
@@ -349,6 +356,7 @@ def main():
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("settings", settings_command))
+    app.add_handler(CommandHandler("scrape", force_scrape_command))
     app.add_handler(CallbackQueryHandler(button_click))
     app.add_handler(MessageHandler(filters.LOCATION, handle_location))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text))
